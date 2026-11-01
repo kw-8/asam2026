@@ -40,4 +40,4 @@ Note: within VScode you may find these extensions helpful for QoL
 4. Type a short message in the box to explain changes → click **Commit**.
 5. Click **Sync Changes**. This downloads others' changes, then uploads yours.
    - If VS Code reports a **conflict**, stop and ask.
-6. On GitHub, open a **Pull Request** from your branch into `main`.
+6. (IF USING OTHER BRANCHES) On GitHub, open a **Pull Request** from your branch into `main`.
