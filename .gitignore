@@ -229,3 +229,6 @@ data/
 *.h5
 *.xlsx
 *.zip
+
+# Exception: small public, non-licensed files (e.g. factor catalog, public factor returns)
+!public_data/*.csv
