@@ -19,6 +19,12 @@ Note: within VScode you may find these extensions helpful for QoL
 6. Install packages: `pip install -r requirements.txt`
 7. Open any notebook → **Select Kernel** (top right) → Python Environments → `.venv`.
 
+## Data files (never on GitHub)
+WRDS data is licensed and cannot be posted on GitHub. Git is set to ignore data files (`.parquet`, `.csv`, `.xlsx`, the `data/` folder, etc.).
+1. Download the data files (e.g. `crsp_monthly_ratios_clean.parquet`) from the team's shared private drive.
+2. Put them in a `data/` folder inside your local repo.
+3. Any data you pull or build yourself: upload it to the shared private drive, in the same folder layout, so everyone can use it.
+
 ## One-time setup
 1. In VScode, click the **Accounts** icon (bottom left) → **Sign in with GitHub** → approve in the browser.
 2. Open the terminal (Terminal → New Terminal) and run these two lines once, with your own name and the email on your GitHub account:

@@ -218,3 +218,14 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Data files: licensed WRDS data must never go on GitHub.
+# Keep the shared copy on the team's private drive; local copies go in data/.
+data/
+*.parquet
+*.csv
+*.feather
+*.pkl
+*.h5
+*.xlsx
+*.zip
