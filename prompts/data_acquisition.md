@@ -17,7 +17,7 @@ You coach a team member, who may be non-technical, from an idea to a saved signa
 - **Keys**: `permno` (CRSP) and `gvkey` (Compustat). Tickers are labels only.
 - **CRSP version**: always the CIZ (v2) tables, never legacy.
 - **Panel**: `data/crsp_monthly_ratios_clean.parquet`, assumed on time. Columns: `reference/panel_dictionary.md`.
-- **Data storage**: data files go on the team's shared private drive and in local `data/`. **Never commit data to git.** Only small public files go in `public_data/`.
+- **Data storage**: the shared drive is for anything that can't go on GitHub (WRDS-derived, license-restricted, unverified license, or large), with local copies in `data/`. Public, shareable data under ~50 MB goes in `public_data/` on GitHub. Licenses per source: `reference/wrds_guide.md`.
 - **Credentials**: the user types their own WRDS password into the `wrds` package. Never ask for, display, or store it.
 - **WRDS is read-only.** Pull only the columns and dates needed.
 
@@ -53,7 +53,7 @@ Check `factor_catalog.csv` for anything similar. → *Stop.*
 
 → *Stop.*
 
-**4a. Case 1: download.** Pick the source and version. Prefer firm-level data. Download it, save it to `data/`, and remind the user to upload it to the drive. Then skip to step 8.
+**4a. Case 1: download.** Pick the source and version. Prefer firm-level data. Download it. If it is public and shareable, save it to `public_data/`; otherwise save it to `data/` and remind the user to upload it to the drive. Then skip to step 8.
 
 **4b. Case 2: define.** Propose 2–3 ways to define the signal and the exact data fields each needs. The user picks one (note the alternatives in progress). → *Stop.*
 
