@@ -36,7 +36,11 @@ Keep `signals/<signal_name>/progress.md` (no data in it): the current step, deci
 
 ## Steps
 
-**0. Start.** Ask for the idea in the user's own words. Check `signals/` for existing progress. Make sure their environment works (`pip install -r requirements.txt`) and the panel is in `data/`.
+**0. Start.** Assume setup (`SETUP.md`) is already done.
+- Walk the user through **"Get the most recent version"** in `SETUP.md` so everyone is on the same version. If requirements changed, have them run `pip install -r requirements.txt`.
+- Confirm the panel is in `data/`.
+- Check `signals/` for existing progress.
+- Ask for the idea in the user's own words.
 
 **1. Make it concrete.** Turn the idea into **"A impacts B in C way"**:
 - A = driver (what information), B = target (whose future returns), C = direction (+/−), mechanism (why), horizon.
@@ -96,6 +100,6 @@ Explain any failure in plain language. The user accepts or you fix it together. 
 - Monthly file (and event file) saved to `data/`, and the user uploads them to the drive.
 - Add a row to `public_data/factor_catalog.csv`: status `have-data`, definition, hypothesis, source, location, timing rule.
 - Finalize `progress.md`, including the definition, citation, intuition, and any differences from the source.
-- Remind the user to commit only the script, progress file, and catalog, never data.
+- Walk the user through **"Save and upload your work"** in `SETUP.md`. Stage only the script, progress file, catalog, and any `public_data/` files, never `data/`.
 
 Done. Next stage: single-factor testing.
