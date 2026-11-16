@@ -2,7 +2,7 @@
 
 Started: 2026-11-12 · Process: `prompts/data_acquisition.md`
 
-**Status (2026-11-14):** Steps 3–10 done; data built and validated; catalog row added. **Left for you:** re-run build + validate (flag now 2010–2014), upload the two data files to the shared drive, commit and sync (see Step 10). Steps 0, 1, 2 and 5 were drafted in a claude.ai chat and never formally ticked; everything built on them was approved later.
+**Status (2026-11-15):** Steps 3–10 done; data built and validated (re-run with the 2010–2014 flag); catalog row added; committed and pushed 2026-11-13. **Backtest done 2026-11-15 → `backtest.md`: not a reliable avoid screen in investable stocks** (about +0.2–0.3%/yr, neither primary test passes, gains mostly in 2000–02 and 2022). **Left for you:** upload the two data files to the shared drive if not done yet; commit the backtest files. Steps 0, 1, 2 and 5 were drafted in a claude.ai chat and never formally ticked; everything built on them was approved later.
 
 ## Summary
 - **Signal:** `filing_sim` — how similar a firm's 10-K is to its previous year's 10-K (cosine similarity of word counts, 0 to 1). **Low = "changer".**
@@ -10,7 +10,7 @@ Started: 2026-11-12 · Process: `prompts/data_acquisition.md`
 - **Citation:** Cohen, L., Malloy, C., & Nguyen, Q. (2020). Lazy Prices. *Journal of Finance*, 75(3), 1371ff. doi:10.1111/jofi.12885
 - **Intuition:** firms keep most 10-K text unchanged year to year; when they do rewrite it, something usually changed (new risks, litigation, a weaker business). Few investors compare filings side by side, so the news reaches prices slowly. Changers then tend to underperform, and most of the paper's return came from the short side.
 - **How ASAM can use it (long-only, no shorting):** as an **avoid screen** — leave out (or underweight) the bottom fifth each month. A left-out stock acts like a short relative to the market (textbook Ch. 2 §2.3.3), but the gain is capped by the stock's benchmark weight, so test both equal- and value-weighted.
-- **Files:** `data/lazy_prices/lazy_prices_monthly.parquet` (one row per panel row: `permno, gvkey, date, filing_sim, period_end, published_date, date_source, source, applies, format_change_2010_14`) and `data/lazy_prices/lazy_prices_events.parquet` (one row per 10-K, with inputs). Not tested for returns here, by design.
+- **Files:** `data/lazy_prices/lazy_prices_monthly.parquet` (one row per panel row: `permno, gvkey, date, filing_sim, period_end, published_date, date_source, source, applies, format_change_2010_14`) and `data/lazy_prices/lazy_prices_events.parquet` (one row per 10-K, with inputs). Not tested for returns here, by design; the backtest is in `backtest.md`.
 - **Known limitations:** (1) values from 10-Ks published 2010–2014 are flagged `format_change_2010_14`: a filing-format change tripled 10-K length and, in 2010–2012, made the largest firms 57–63% of the bottom fifth (English-only words did not fix it) — run the backtest with and without these months; (2) usable from 1998; filings end 2024-12, so 2025 values are 2024 10-Ks; (3) 85% of 1998–2024 stock-months have a value (new listings need two comparable 10-Ks first); (4) 11 events lack a `period_end` and 41 have a doubtful one (WRDS `rdate`); timing does not use it.
 
 ## Differences from the source (Cohen, Malloy & Nguyen 2020)
@@ -191,8 +191,8 @@ Script: `signals/lazy_prices/validate_lazy_prices.py` (no WRDS) → `data/lazy_p
 - Small-business forms (`10KSB`, `10KSB40`; filed until 2009): kept (Step 8 item 1, approved 2026-11-13).
 
 ## Next
-1. Re-run (no password), from the repo root with the `.venv` active:
-   `python signals\lazy_prices\build_lazy_prices.py` then `python signals\lazy_prices\validate_lazy_prices.py`
-2. Upload `data/lazy_prices/lazy_prices_monthly.parquet` and `lazy_prices_events.parquet` to the shared drive.
-3. Commit and sync per SETUP.md "Save and upload your work" (files listed in Step 10). Suggested message: `Add lazy_prices (filing_sim) signal: scripts, progress notes, catalog row`.
-4. Later: backtest as an avoid screen (equal- and value-weighted; with and without `format_change_2010_14` months; 2015–2024 as the out-of-sample test).
+1. ✅ Re-run build + validate (2026-11-13: 198,837 rows flagged `format_change_2010_14`; 6 PASS, check 7 handled by the flag).
+2. Upload `data/lazy_prices/lazy_prices_monthly.parquet` and `lazy_prices_events.parquet` to the shared drive (if not done yet).
+3. ✅ Commit and sync (2026-11-13, `Add lazy_prices (filing_sim) signal: scripts, progress notes, catalog row`).
+4. ✅ Backtest as an avoid screen (2026-11-15): plan, results and draft catalog text in `backtest.md`; script `backtest_lazy_prices.py`; outputs in `data/lazy_prices/backtest/`. To reproduce: `python signals\lazy_prices\backtest_lazy_prices.py` (no WRDS, ~1 minute).
+5. Commit `backtest.md`, `backtest_lazy_prices.py` and the updated `progress.md`; add the draft `test_results` text to the catalog row if you agree with it.
