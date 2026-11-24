@@ -11,3 +11,4 @@ from .evaluate import (perf, perf_monthly, report, split, to_annual, annual_fact
 from .diagnostics import screen, fama_macbeth, comove
 from .plots import plot_log_growth, plot_perf
 from .extras import by_formation_month, multi_asset, current_portfolio
+from .single_signal import add_signal, coverage, spread, zip_stats, dsr_haircut, test_signal, CONTROLS
