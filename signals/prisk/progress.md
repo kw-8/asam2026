@@ -49,3 +49,34 @@ Level PRisk is **not a usable return signal** in large caps 2003-2021: wrong sig
 3. **Conditional use:** PRisk as a risk *filter* (avoid top-decile PRisk in high-EPU months) inside a low-vol/quality strategy rather than as a stand-alone tilt.
 4. Monthly (not annual) rebalance with a 1-3 month horizon: the information is quarterly and may decay within the year.
 5. EPU beta (dropped tonight) if the group wants a macro-exposure signal later.
+
+## EDGAR PRisk (current-data rebuild) - definition fixed 2026-11-24, before any build or return test
+- Why: the free call-based PRisk ends with calls of 2022-03-31 (`data/prisk/firmquarter_2022q1.csv`; site says "updated through March 31, 2021"); our WRDS account cannot read `ciq_transcripts` (permission denied). EDGAR 10-K/10-Q text is free and current.
+- Method = Hassan et al. eq. (1) (NBER w24029 p.10) applied to filings instead of call transcripts:
+  EPRisk_{i,f} = sum over bigrams b of filing f of 1[b in P\N] x 1[|b - r| < 10] x w_b, divided by the number of bigrams in f.
+  - P\N and w_b: their published list `combined_politicaltbb_npb_finalbigrams.csv` (188,878 bigrams, tf*idf x 100,000) -> `data/prisk/edgar/political_bigrams.csv`.
+  - r = position of the nearest risk synonym: the 124 words of their Appendix Table 3 (p.70; "question", "questions", "venture" excluded).
+  - Text: primary document of the filing only (no exhibits), HTML stripped, lowercase, punctuation removed, alphabetic tokens.
+- Filings: 10-K, 10-K405, 10-Q of firms ever in the lab universe (Dec cohorts 2001-2025: 2,155 gvkeys, ~150k filings before link-date filtering). List: `wrdssec.wrds_forms`; CIK-gvkey: `wrdssec.wciklink_gvkey` (link valid at the filing date).
+- Timing: published_date = first trading day after SEC acceptance date (`secadate`), date_source = exact. Monthly file: latest filing published by month-end, not older than 6 months. Signals mirror the call version: `eprisk4` = mean of last 4 filings (>= 3), `eprisk_dm4` = eprisk4 minus mean of the 8 filings before.
+- Validation before any return test (2002-2022 overlap with call PRisk, same firm, filing vs call in the same fiscal quarter): per-quarter cross-sectional Spearman of eprisk vs prisk, and of eprisk_dm4 vs prisk_dm4. Rule fixed now: median Spearman < 0.2 -> report it as a different measure, not a PRisk substitute, before any return test.
+- Pilot first: 50 random universe firms, filings 2015-2019, to check parsing and the validation numbers; then the full pull.
+
+## Augmentation research (pre-registered 2026-11-24, before any augmentation return was computed)
+- Question: does a logical augmentation of PRisk beat plain `prisk_dm4` (already seen: +1.2%/yr design and holdout) or `prisk4` (no spread)?
+- Notation per firm (gvkey), per call/filing, base b (parameter: `prisk` now, `eprisk` later): b4 = mean of last 4 (>=3); past8 = mean of the 8 before (>=4); dm4 = b4 - past8 (= prisk_dm4). Monthly mapping = build_prisk.py rule (latest event published by month-end, not older than 6 months). Code: `signals/prisk/augment/`, data: `data/prisk/augment/`.
+- Candidates (all: higher -> higher next-12-month return, `higher_better=True`):
+  - **A1 dm4_ind** = pct rank of dm4 within (cohort, FF12 sector). Rationale: an industry-wide political shock (e.g. health reform) is priced at once in the whole industry; the firm-specific rise in exposure is the slow-moving part.
+  - **A2 dm4_o_sent** = per-cohort residual of rank(dm4) on rank(psent_dm4), psent_dm4 = psent4 - past8(psent). Rationale: separate risk (second moment) from good/bad political news (first moment, a different and possibly opposite-signed effect).
+  - **A3 sys_dm4** = dm4 of s = priskt_economic + priskt_trade + priskt_tax. Rationale: economic/trade/tax policy risk is shared across firms (aggregate, undiversifiable, Pastor-Veronesi), so it is the part that should carry a premium.
+  - **A4 dm4_o_np** = per-cohort residual of rank(dm4) on rank(nprisk_dm4). Rationale: a firm that talks more about all risks (distress, demand) is not the same as one facing more political risk; keep the political part.
+  - **A5 dm4_z** = dm4 / sd(previous 8 values) (>=4, sd>0). Rationale: SUE-style surprise; the same change means more for a firm with a stable PRisk history and less for a noisy transcript.
+- Not chosen: PRisk x aggregate EPU (a scalar at each date does not change cross-sectional ranks; EPU timing on 10 design years is untestable); vol/beta conditioning (kept as the disguise check, not a candidate).
+- Primary spec (each): q = 0.2, EW, annual December formation, lab universe; FM with lab CONTROLS (vol36, gprof, debt_at, ep, mom, me, bm). Disguise check: comove with vol36, me, beta60 (60-month market beta, >=36 months) and FM with CONTROLS + beta60.
+- Selection on DESIGN only (cohorts Dec 2002-Dec 2011, design_end 2012-12-31): finalists = the top 2 candidates by design Sharpe with design mean > 0. "Improves on PRisk" iff finalist design Sharpe > prisk_dm4 design Sharpe AND holdout mean > 0. HOLDOUT computed once, only for the finalists; non-finalists' holdout is not computed.
+- n_trials = 15 (10 earlier PRisk variants + A1-A5). DSR: design Sharpe of each finalist vs the 15 design Sharpes; FULL-period DSR of the finalists using the same 15-trial dispersion.
+
+### EDGAR PRisk pilot validation and revision 1 (2026-11-24, no returns seen)
+- Pilot (whole primary document, 575 of 742 filings scored when checked; 36 firms matched to a call within 45 days): per-quarter cross-sectional Spearman eprisk vs prisk median 0.106 (15 quarters, min -0.36, max 0.33); pooled 0.105; 10-K 0.168, 10-Q 0.074; within-firm 0.080; per-firm time-series median 0.006. Below the 0.2 rule: whole-document eprisk is a different measure from call PRisk.
+- Revision 1 (one shot, logged as a change; validation against PRisk only, no return test): score only the MD&A section (10-K Item 7, 10-Q Item 2: from the "managements discussion and analysis" heading with the longest span to the next "quantitative and qualitative disclosures" / "financial statements and supplementary data" / "controls and procedures" heading), since MD&A is management's own discussion, the filing text closest to a call. Same eq. (1), same pilot firms and years, same 0.2 rule. If it fails, EDGAR PRisk is dropped and the call-based prisk_dm4 (through the 2022q1 vintage) is the delivered factor.
+- Revision 1 result (MD&A only, 733 of 742 scored, 37 firms matched): per-quarter Spearman median 0.079 (20 quarters, min -0.29, max 0.42); pooled 0.088; 10-K 0.132, 10-Q 0.054; within-firm 0.075; per-firm time-series median 0.035. Fails the 0.2 rule. EDGAR PRisk dropped as pre-registered; no full pull. Factor = call-based prisk_dm4 (data through the 2021q1/2022q1 vintages). Scripts kept: signals/prisk/pull_prisk_edgar.py (User-Agent from env SEC_USER_AGENT).
